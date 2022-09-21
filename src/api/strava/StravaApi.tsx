@@ -1,9 +1,9 @@
 import { Button, CircularProgress, Grid } from "@mui/material";
-import axios from 'axios';
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { REACT_APP_CLIENT_ID, REACT_APP_CLIENT_SECRET } from "../../constants/StravaConstants";
 import { TokenValue } from "../../providers/TokenResponseProvider";
+import axios from "../../utils/axios-config";
 import { StreamKeys } from './enums';
 import {
     ActivityZone, AthleteStats, Comment,
@@ -33,7 +33,10 @@ export class Strava {
                 },
                 params: params
             })
-            .then(res => res.data);
+            .then(res => {
+                console.log("Request " + res.id + " was cached " + res.cached);
+                return res.data;
+            });
     }
 
     /**
@@ -205,7 +208,7 @@ export default function StravaRedirect() {
         let code = searchParams.get("code");
         if (code != null) {
             axios
-                .post<TokenValue>(`${STRAVA_API_URL }/oauth/token?client_id=${REACT_APP_CLIENT_ID}&client_secret=${REACT_APP_CLIENT_SECRET}&code=${code}&grant_type=authorization_code`)
+                .post<TokenValue>(`${STRAVA_API_URL}/oauth/token?client_id=${REACT_APP_CLIENT_ID}&client_secret=${REACT_APP_CLIENT_SECRET}&code=${code}&grant_type=authorization_code`)
                 .then(function (response) {
                     console.log(response);
                     storeTokenData(response.data);

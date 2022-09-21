@@ -1,4 +1,5 @@
 export enum ActivityType {
+    AllSportTypes = 'All sport types',
 	AlpineSki = 'AlpineSki',
 	BackcountrySki = 'BackcountrySki',
 	Canoeing = 'Canoeing',

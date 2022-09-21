@@ -1,3 +1,6 @@
+@import '~leaflet/dist/leaflet.css';
+@import '~leaflet-geosearch/dist/geosearch.css';
+
 .App {
   text-align: center;
 }
