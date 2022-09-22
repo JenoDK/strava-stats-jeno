@@ -1,6 +1,6 @@
 {
   "name": "strava-stats-jeno",
-  "homepage": "https://JenoDK.github.io/strava-stats-jeno",
+  "homepage": ".",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -31,7 +31,7 @@
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.0.2",
     "react-redux": "^8.0.2",
-    "react-router-dom": "^6.3.0",
+    "react-router-dom": "^6.4.0",
     "react-scripts": "5.0.1",
     "redux": "^4.2.0",
     "typescript": "^4.8.2",

@@ -200,7 +200,7 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
                         should_include = should_include && filters.types.indexOf(activity.type) > -1;
                     }
                 }
-                if (filters.position) {
+                if (filters.position && activity.map) {
                     let coordinateIn5KmRadiusOfPosition = decode(activity.map.summary_polyline).find((latlng) => {
                         let distanceBetweenPoints = filters.position!.position.distanceTo({
                             lat: latlng[0],
@@ -220,6 +220,9 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
     const limeOptions = { color: 'orange' }
 
     function getPolyline(map: PolylineMap): ReactNode {
+        if (!map) {
+            return null;
+        }
         let decoded = decode(map.summary_polyline);
         var bounds = new L.LatLngBounds(decoded);
         var center = bounds.getCenter();

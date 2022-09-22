@@ -44,6 +44,7 @@ function DashboardContent(props: DashboardProperties) {
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(event.currentTarget);
     };
+    
     const handleCloseNavMenu = () => {
         setAnchorElNav(null);
     };
