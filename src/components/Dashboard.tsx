@@ -11,7 +11,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import React from 'react';
-import { REACT_APP_CLIENT_ID, redirectUrl, scope } from '../constants/StravaConstants';
+import { REACT_APP_CLIENT_ID, scope } from '../constants/StravaConstants';
 import { hasValidToken } from '../utils/UtilFunctions';
 import StravaStats from './strava/StravaStats';
 
@@ -50,7 +50,7 @@ function DashboardContent(props: DashboardProperties) {
     };
 
     const handleStravaLogin = () => {
-        window.location.replace(`http://www.strava.com/oauth/authorize?client_id=${REACT_APP_CLIENT_ID}&response_type=code&redirect_uri=${redirectUrl}/exchange_token&approval_prompt=force&scope=${scope}`);
+        window.location.replace(`http://www.strava.com/oauth/authorize?client_id=${REACT_APP_CLIENT_ID}&response_type=code&redirect_uri=${window.location.origin}/redirect/exchange_token&approval_prompt=force&scope=${scope}`);
     };
 
     return (
