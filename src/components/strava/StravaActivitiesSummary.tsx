@@ -17,6 +17,10 @@ export default function StravaActivitiesSummary(props: StravaActivitiesSummaryPr
         return `Total elevation gained: ${totalElevation}m`;
     }
 
+    function getTotalActivities(): string {
+        return `Total activities: ${props.activities.length}`;
+    }
+
     function hoursSpent(): string {
         const totalMovingTimeInMinutes = (props.activities.reduce((sum, activity) => sum + activity.moving_time, 0) / 60);
         const inHours = Math.floor(totalMovingTimeInMinutes / 60).toFixed(0);
@@ -25,7 +29,7 @@ export default function StravaActivitiesSummary(props: StravaActivitiesSummaryPr
     }
 
     function getSummaries(): string[] {
-        return [getTotalDistance(), getTotalElevation(), hoursSpent()]
+        return [getTotalActivities(), getTotalDistance(), getTotalElevation(), hoursSpent()]
     }
 
     return (

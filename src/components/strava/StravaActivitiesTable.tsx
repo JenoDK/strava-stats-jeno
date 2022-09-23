@@ -11,6 +11,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { AxiosError } from 'axios';
+import { Moment } from 'moment';
 import { ReactNode, useEffect, useReducer, useState } from 'react';
 import { MapContainer, Polyline, TileLayer } from 'react-leaflet';
 import { ActivityType } from '../../api/strava/enums';
@@ -24,6 +25,8 @@ import { decode } from 'google-polyline';
 import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import moment from 'moment';
+import { IncludeOption } from '../../api/strava/enums/include-choice';
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -160,6 +163,10 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
         checkFilters(filters);
     }, [filters])
 
+    function resetFilters() {
+        setFilters(defaultFilter);
+    }
+
     function filterChanged(event: React.ChangeEvent<any>) {
         if (event.currentTarget.id) {
             if (event.currentTarget.type === "checkbox") {
@@ -170,11 +177,39 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
         }
     }
 
+    function includeVirtualChanged(includeOption: IncludeOption) {
+        setFilters({ include_virtual: includeOption });
+    }
+
+    function includePrivateChanged(includeOption: IncludeOption) {
+        setFilters({ include_private: includeOption });
+    }
+
+    function includeCommuteChanged(includeOption: IncludeOption) {
+        setFilters({ include_commutes: includeOption });
+    }
+
     function sportTypeChanged(sportTypes: ActivityType[]) {
         setFilters({ types: sportTypes })
     }
 
-    function positionFilterChanged(position: PositionFilter) {
+    function beforeChanged(value?: Moment) {
+        if (value) {
+            setFilters({ before: value.utc().startOf('day') });
+        } else {
+            setFilters({ before: undefined });
+        }
+    }
+
+    function afterChanged(value?: Moment) {
+        if (value) {
+            setFilters({ after: value.utc().startOf('day') });
+        } else {
+            setFilters({ after: undefined });
+        }
+    }
+
+    function positionFilterChanged(position?: PositionFilter) {
         setFilters({ position: position });
     }
 
@@ -184,11 +219,53 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
             let actvts: SummaryActivity[] = JSON.parse(sessionActivities);
             let filteredActivities = actvts.filter(activity => {
                 var should_include = true;
-                if (!filters.include_commutes) {
-                    should_include = should_include && !activity.commute;
+                if (filters.include_commutes) {
+                    switch (filters.include_commutes) {
+                        case IncludeOption.EXCLUDE:
+                            should_include = should_include && !activity.commute;
+                            break;
+                        case IncludeOption.INCLUDE:
+                            // No need to change should_include here
+                            break;
+                        case IncludeOption.ONLY:
+                            should_include = should_include && activity.commute;
+                            break;
+                    }
+                }
+                if (filters.include_private) {
+                    switch (filters.include_private) {
+                        case IncludeOption.EXCLUDE:
+                            should_include = should_include && !activity.private;
+                            break;
+                        case IncludeOption.INCLUDE:
+                            // No need to change should_include here
+                            break;
+                        case IncludeOption.ONLY:
+                            should_include = should_include && activity.private;
+                            break;
+                    }
+                }
+                if (filters.include_virtual) {
+                    switch(filters.include_virtual) {
+                        case IncludeOption.EXCLUDE:
+                            should_include = should_include && activity.type != ActivityType.VirtualRide;
+                            break;
+                        case IncludeOption.INCLUDE:
+                            // No need to change should_include here
+                            break;
+                        case IncludeOption.ONLY:
+                            should_include = should_include && activity.type == ActivityType.VirtualRide;
+                            break;
+                    }
                 }
                 if (filters.title_text && !activity.name.toLowerCase().includes(filters.title_text.toLowerCase())) {
                     return false;
+                }
+                if (filters.before) {
+                    should_include = should_include && moment(activity.start_date).isBefore(filters.before);
+                }
+                if (filters.after) {
+                    should_include = should_include && moment(activity.start_date).isAfter(filters.after);
                 }
                 if (filters.types) {
                     // If no types were selected nothing will match
@@ -200,15 +277,19 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
                         should_include = should_include && filters.types.indexOf(activity.type) > -1;
                     }
                 }
-                if (filters.position && activity.map) {
-                    let coordinateIn5KmRadiusOfPosition = decode(activity.map.summary_polyline).find((latlng) => {
-                        let distanceBetweenPoints = filters.position!.position.distanceTo({
-                            lat: latlng[0],
-                            lng: latlng[1]
+                if (filters.position) {
+                    if (activity.map) {
+                        let coordinateIn5KmRadiusOfPosition = decode(activity.map.summary_polyline).find((latlng) => {
+                            let distanceBetweenPoints = filters.position!.position.distanceTo({
+                                lat: latlng[0],
+                                lng: latlng[1]
+                            });
+                            return distanceBetweenPoints < filters.position!.radius;
                         });
-                        return distanceBetweenPoints < filters.position!.radius;
-                    });
-                    should_include = should_include && coordinateIn5KmRadiusOfPosition != undefined;
+                        should_include = should_include && coordinateIn5KmRadiusOfPosition != undefined;
+                    } else {
+                        should_include = false;
+                    }
                 }
                 return should_include;
             });
@@ -235,6 +316,8 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
         </MapContainer>;
     }
 
+    const defaultActivityMapWidth = "30%";
+
     return (
         <Container maxWidth="lg" disableGutters>
             <StravaActivitiesSummary activities={activities} />
@@ -242,17 +325,24 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
                 <StravaActivitiesFilter 
                     defaultValues={defaultFilter} 
                     onFilterChange={filterChanged} 
+                    onIncludeVirtualRideChanged={includeVirtualChanged}
+                    onIncludePrivateActivitiesChanged={includePrivateChanged}
+                    onIncludeCommuteActivitiesChanged={includeCommuteChanged}
+                    onBeforeChanged={beforeChanged}
+                    onAfterChanged={afterChanged}
                     onPositionFilterChanged={positionFilterChanged} 
-                    onSportTypeChange={sportTypeChanged} />
+                    onSportTypeChange={sportTypeChanged}
+                    onFilterReset={resetFilters} />
             </Container>
             <TableContainer component={Paper} sx={{ marginTop: 2 }}>
                 <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
                     <TableHead>
                         <TableRow>
                             <TableCell>Title</TableCell>
+                            <TableCell>Date</TableCell>
                             <TableCell>Distance (km)</TableCell>
                             <TableCell>Kudos</TableCell>
-                            <TableCell width={"60%"} >Map</TableCell>
+                            <TableCell width={defaultActivityMapWidth} >Map</TableCell>
                         </TableRow>
                     </TableHead>
                     {loading ?
@@ -291,9 +381,10 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
                                     <TableCell>
                                         <Link href={`https://www.strava.com/activities/${activity.id}`} target="_blank" rel="noreferrer" >{activity.name}</Link>
                                     </TableCell>
-                                    <TableCell>{(activity.distance / 1000).toFixed(2)}</TableCell>
+                                    <TableCell>{moment(activity.start_date).format("D/MM/YYYY HH:mm:ss")}</TableCell>
+                                    <TableCell>{(activity.distance / 1000).toFixed(2)} km</TableCell>
                                     <TableCell>{activity.kudos_count}</TableCell>
-                                    <TableCell width={"60%"}>
+                                    <TableCell width={defaultActivityMapWidth}>
                                         {getPolyline(activity.map)}
                                     </TableCell>
                                 </TableRow>
