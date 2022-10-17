@@ -305,15 +305,19 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
             return null;
         }
         let decoded = decode(map.summary_polyline);
-        var bounds = new L.LatLngBounds(decoded);
-        var center = bounds.getCenter();
-        return <MapContainer style={{ height: "200px" }} center={center} bounds={bounds} >
-            <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <Polyline pathOptions={limeOptions} positions={decoded} />
-        </MapContainer>;
+        if (decoded.length > 0) {
+            var bounds = new L.LatLngBounds(decoded);
+            var center = bounds.getCenter();
+            return <MapContainer style={{ height: "200px" }} center={center} bounds={bounds} >
+                <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Polyline pathOptions={limeOptions} positions={decoded} />
+            </MapContainer>;
+        } else {
+            return null;
+        }
     }
 
     const defaultActivityMapWidth = "30%";

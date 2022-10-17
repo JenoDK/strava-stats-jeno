@@ -50,7 +50,7 @@ const names: string[] = Object.values(ActivityType);
 const includeOptions: string[] = Object.values(IncludeOption);
 const defaultCenter = new LatLng(51.50, -0.11)
 const defaultSportTypes = [ActivityType.AllSportTypes];
-const defaultUseMapFilter = true;
+const defaultUseMapFilter = false;
 const defaultRadius = 5000;
 const defaultAfter = null;
 const defaultBefore = null;
@@ -135,10 +135,12 @@ export default function StravaActivitiesFilter(props: StravaActivitiesFilterProp
     }, [useMapFilter]);
 
     useEffect(() => {
-        props.onPositionFilterChanged({
-            position: position,
-            radius: radius
-        });
+        if (useMapFilter) {
+            props.onPositionFilterChanged({
+                position: position,
+                radius: radius
+            });
+        }
     }, [radius, position]);
 
     useEffect(() => {
@@ -315,18 +317,6 @@ export default function StravaActivitiesFilter(props: StravaActivitiesFilterProp
                     renderInput={(params) => <TextField {...params} />}
                 />
             </LocalizationProvider>
-            <TextField
-                label="Radius around marker"
-                defaultValue={radius}
-                sx={{ m: 1, width: '25ch' }}
-                InputProps={{
-                    endAdornment: <InputAdornment position="end">m</InputAdornment>,
-                }}
-                onChange={(event) => {
-                    setRadius(Number(event.currentTarget.value));
-                }}
-                variant="filled"
-            />
             <FormControlLabel control={
                 <Switch
                     checked={useMapFilter}
@@ -335,21 +325,35 @@ export default function StravaActivitiesFilter(props: StravaActivitiesFilterProp
                 />
             } label="Use map filter" />
             {useMapFilter ?
-                <MapContainer style={{ height: "500px" }} center={position} zoom={13} >
-                    <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                <div>
+                    <TextField
+                        label="Radius around marker"
+                        defaultValue={radius}
+                        sx={{ m: 1, width: '25ch' }}
+                        InputProps={{
+                            endAdornment: <InputAdornment position="end">m</InputAdornment>,
+                        }}
+                        onChange={(event) => {
+                            setRadius(Number(event.currentTarget.value));
+                        }}
+                        variant="filled"
                     />
-                    <DraggableMarker />
-                    <Circle
-                        center={position}
-                        pathOptions={{ fillColor: 'blue' }}
-                        radius={radius}
-                        stroke={false}
-                    />
-                    <CenterOnStartChanged position={position} />
-                    <SearchField />
-                </MapContainer>
+                    <MapContainer style={{ height: "500px" }} center={position} zoom={13} >
+                        <TileLayer
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        <DraggableMarker />
+                        <Circle
+                            center={position}
+                            pathOptions={{ fillColor: 'blue' }}
+                            radius={radius}
+                            stroke={false}
+                        />
+                        <CenterOnStartChanged position={position} />
+                        <SearchField />
+                    </MapContainer>
+                </div>
                 :
                 <div></div>}
         </Container>
