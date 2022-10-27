@@ -1,7 +1,7 @@
 import { Button, CircularProgress, Grid } from "@mui/material";
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { REACT_APP_CLIENT_ID, REACT_APP_CLIENT_SECRET } from "../../constants/StravaConstants";
+import { REACT_APP_BASE_PATH, REACT_APP_CLIENT_ID, REACT_APP_CLIENT_SECRET } from "../../constants/StravaConstants";
 import { TokenValue } from "../../providers/TokenResponseProvider";
 import axios from "../../utils/axios-config";
 import { StreamKeys } from './enums';
@@ -212,7 +212,7 @@ export default function StravaRedirect() {
                 .then(function (response) {
                     console.log(response);
                     storeTokenData(response.data);
-                    navigate("/");
+                    navigate(REACT_APP_BASE_PATH!);
                 })
                 .catch(function (error) {
                     console.log(error);
