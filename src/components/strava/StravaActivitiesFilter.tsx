@@ -1,4 +1,4 @@
-import { Button, Checkbox, Container, FormControl, FormControlLabel, InputAdornment, InputLabel, ListItemText, MenuItem, OutlinedInput, Select, SelectChangeEvent, Switch, TextField } from "@mui/material";
+import { Button, Checkbox, Container, FormControl, FormControlLabel, InputAdornment, InputLabel, ListItemText, MenuItem, OutlinedInput, Select, SelectChangeEvent, Slider, Switch, TextField, Typography } from "@mui/material";
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -24,6 +24,8 @@ export interface ActivitiesFilter {
     before?: Moment;
     after?: Moment;
     position?: PositionFilter;
+    min_avg_speed?: number;
+    avg_speed_between?: number[];
 }
 
 export const defaultFilter: ActivitiesFilter = {
@@ -42,6 +44,7 @@ interface StravaActivitiesFilterProps {
     onPositionFilterChanged: (position?: PositionFilter) => void;
     onBeforeChanged: (value?: Moment) => void;
     onAfterChanged: (value?: Moment) => void;
+    onAvgSpeedBetweenChanged: (value: number[]) => void;
     onFilterReset: () => void;
     defaultValues: ActivitiesFilter;
 }
@@ -54,6 +57,8 @@ const defaultUseMapFilter = false;
 const defaultRadius = 5000;
 const defaultAfter = null;
 const defaultBefore = null;
+const defaultMinAvgSpeed = null;
+const defaultAvgSpeedBetween = [0, 100];
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -65,6 +70,23 @@ const MenuProps = {
         },
     },
 };
+
+function avgSpeedBetweenText(value: number) {
+    return `${value} km/h`;
+}
+
+const minDistance = 10;
+
+const avg_speed_between_marks = [
+    {
+        value: 0,
+        label: '0 km/h',
+    },
+    {
+        value: 100,
+        label: '100 km/h',
+    },
+];
 
 export default function StravaActivitiesFilter(props: StravaActivitiesFilterProps) {
 
@@ -78,6 +100,8 @@ export default function StravaActivitiesFilter(props: StravaActivitiesFilterProp
     const [useMapFilter, setUseMapFilter] = useState(defaultUseMapFilter);
     const [after, setAfter] = useState<Moment | null>(defaultAfter);
     const [before, setBefore] = useState<Moment | null>(defaultBefore);
+    const [minAvgSpeed, setMinAvgSpeed] = useState<number | null>(defaultMinAvgSpeed);
+    const [avgSpeedBetween, setAvgSpeedBetween] = useState<number[]>(defaultAvgSpeedBetween);
 
     const handleSportTypeChange = (event: SelectChangeEvent<typeof sportType>) => {
         let value = event.target.value;
@@ -97,6 +121,22 @@ export default function StravaActivitiesFilter(props: StravaActivitiesFilterProp
 
     const handleCommuteChange = (event: SelectChangeEvent<typeof includeCommute>) => {
         setIncludeCommute(event.target.value);
+    };
+
+    const handleAvgSpeedBetweenChange = (
+        event: Event,
+        newValue: number | number[],
+        activeThumb: number,
+    ) => {
+        if (!Array.isArray(newValue)) {
+            return;
+        }
+        if (activeThumb === 0) {
+            setAvgSpeedBetween([Math.min(newValue[0], avgSpeedBetween[1] - minDistance), avgSpeedBetween[1]]);
+        } else {
+            setAvgSpeedBetween([avgSpeedBetween[0], Math.max(newValue[1], avgSpeedBetween[0] + minDistance)]);
+        }
+        props.onAvgSpeedBetweenChanged(avgSpeedBetween);
     };
 
     useEffect(() => {
@@ -207,6 +247,8 @@ export default function StravaActivitiesFilter(props: StravaActivitiesFilterProp
         setIncludePrivate(props.defaultValues.include_private);
         setIncludeCommute(props.defaultValues.include_commutes);
         setTitle(props.defaultValues.title_text);
+        setMinAvgSpeed(defaultMinAvgSpeed);
+        setAvgSpeedBetween(defaultAvgSpeedBetween);
     }
 
     return (
@@ -281,6 +323,31 @@ export default function StravaActivitiesFilter(props: StravaActivitiesFilterProp
                     setTitle(event.target.value);
                     props.onFilterChange(event);
                 }}
+            />
+            <TextField
+                id="min_avg_speed"
+                label="Min avg speed"
+                value={minAvgSpeed}
+                type="number"
+                InputProps={{
+                    endAdornment: <InputAdornment position="end">km/h</InputAdornment>,
+                }}
+                onChange={(event) => {
+                    setMinAvgSpeed((Number(event.target.value) || null) );
+                    props.onFilterChange(event);
+                }}
+            />
+            <Typography id="input-slider" gutterBottom>
+                Avg speed between (km/h)
+            </Typography>
+            <Slider
+                getAriaLabel={() => 'Minimum distance'}
+                value={avgSpeedBetween}
+                valueLabelDisplay="on"
+                disableSwap
+                onChange={handleAvgSpeedBetweenChange}
+                getAriaValueText={avgSpeedBetweenText}
+                marks={avg_speed_between_marks}
             />
             <FormControl sx={{ m: 1, width: 300 }}>
                 <InputLabel id="sport-type-label">Sport</InputLabel>

@@ -193,6 +193,10 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
         setFilters({ types: sportTypes })
     }
 
+    function avgSpeedBetweenChanged(avgSpeedBetween: number[]) {
+        setFilters({ avg_speed_between: avgSpeedBetween })
+    }
+
     function beforeChanged(value?: Moment) {
         if (value) {
             setFilters({ before: value.utc().startOf('day') });
@@ -260,6 +264,13 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
                 }
                 if (filters.title_text && !activity.name.toLowerCase().includes(filters.title_text.toLowerCase())) {
                     return false;
+                }
+                const activitySpeedInKmPerH = (activity.average_speed * 3.6)
+                if (filters.min_avg_speed && activitySpeedInKmPerH < filters.min_avg_speed) {
+                    return false;
+                }
+                if (filters.avg_speed_between) {
+                    should_include = should_include && (filters.avg_speed_between[0] < activitySpeedInKmPerH && activitySpeedInKmPerH < filters.avg_speed_between[1]);
                 }
                 if (filters.before) {
                     should_include = should_include && moment(activity.start_date).isBefore(filters.before);
@@ -336,6 +347,7 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
                     onAfterChanged={afterChanged}
                     onPositionFilterChanged={positionFilterChanged} 
                     onSportTypeChange={sportTypeChanged}
+                    onAvgSpeedBetweenChanged={avgSpeedBetweenChanged}
                     onFilterReset={resetFilters} />
             </Container>
             <TableContainer component={Paper} sx={{ marginTop: 2 }}>
@@ -344,7 +356,9 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
                         <TableRow>
                             <TableCell>Title</TableCell>
                             <TableCell>Date</TableCell>
+                            <TableCell>Avg speed (km/h)</TableCell>
                             <TableCell>Distance (km)</TableCell>
+                            <TableCell>Elevation (m)</TableCell>
                             <TableCell>Kudos</TableCell>
                             <TableCell width={defaultActivityMapWidth} >Map</TableCell>
                         </TableRow>
@@ -386,7 +400,9 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
                                         <Link href={`https://www.strava.com/activities/${activity.id}`} target="_blank" rel="noreferrer" >{activity.name}</Link>
                                     </TableCell>
                                     <TableCell>{moment(activity.start_date).format("D/MM/YYYY HH:mm:ss")}</TableCell>
+                                    <TableCell>{(activity.average_speed * 3.6).toFixed(2)} km/h</TableCell>
                                     <TableCell>{(activity.distance / 1000).toFixed(2)} km</TableCell>
+                                    <TableCell>{activity.total_elevation_gain} meters</TableCell>
                                     <TableCell>{activity.kudos_count}</TableCell>
                                     <TableCell width={defaultActivityMapWidth}>
                                         {getPolyline(activity.map)}
