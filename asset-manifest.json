@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/strava-stats-jeno/static/css/main.cb7098e2.css",
-    "main.js": "/strava-stats-jeno/static/js/main.bcf0e683.js",
+    "main.js": "/strava-stats-jeno/static/js/main.529fa419.js",
     "static/js/787.f26f2dbd.chunk.js": "/strava-stats-jeno/static/js/787.f26f2dbd.chunk.js",
     "index.html": "/strava-stats-jeno/index.html",
     "main.cb7098e2.css.map": "/strava-stats-jeno/static/css/main.cb7098e2.css.map",
-    "main.bcf0e683.js.map": "/strava-stats-jeno/static/js/main.bcf0e683.js.map",
+    "main.529fa419.js.map": "/strava-stats-jeno/static/js/main.529fa419.js.map",
     "787.f26f2dbd.chunk.js.map": "/strava-stats-jeno/static/js/787.f26f2dbd.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.cb7098e2.css",
-    "static/js/main.bcf0e683.js"
+    "static/js/main.529fa419.js"
   ]
 }
