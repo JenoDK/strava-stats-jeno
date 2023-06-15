@@ -1,6 +1,6 @@
 {
   "name": "strava-stats-jeno",
-  "homepage": "https://main.d2fiyhc1rvo5l8.amplifyapp.com",
+  "homepage": "https://jenodk.github.io/strava-stats-jeno/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -43,9 +43,9 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "start": "react-scripts start",
-    "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build": "react-scripts build && cp build/index.html build/404.html"
   },
   "eslintConfig": {
     "extends": [

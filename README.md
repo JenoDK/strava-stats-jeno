@@ -2,12 +2,37 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Github Pages
+
+To publish to github pages please follow the following.  
+Make sure you have a `.env.production` containing the following:
+```
+REACT_APP_CLIENT_ID=blah
+REACT_APP_CLIENT_SECRET=hey
+REACT_APP_REDIRECT_BASE_URI=https://jenodk.github.io/strava-stats-jeno
+REACT_APP_BASE_PATH=/
+```
+and run these commands
+```
+npm run predeploy
+```
+```
+npm run deploy
+```
+
 ## Available Scripts
 
 In the project directory, you can run:
 
 ### `npm start`
 
+Before you run this make sure to have a `.env.development` file containing:
+```
+REACT_APP_CLIENT_ID=blah
+REACT_APP_CLIENT_SECRET=hey
+REACT_APP_REDIRECT_BASE_URI=http://localhost:3000/strava-stats-jeno
+REACT_APP_BASE_PATH=/
+```
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
