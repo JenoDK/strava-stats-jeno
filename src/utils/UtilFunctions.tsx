@@ -1,11 +1,11 @@
 import { useState } from "react";
 
 function hasValidToken(): boolean {
-    return sessionStorage.getItem("accessToken") != null && Number(sessionStorage.getItem("expirationDate")) * 1000 > new Date().getTime();
+    return localStorage.getItem("accessToken") != null && Number(localStorage.getItem("expirationDate")) * 1000 > new Date().getTime();
 }
 
 function getAccessToken(): string | null {
-    return sessionStorage.getItem("accessToken");
+    return localStorage.getItem("accessToken");
 }
 
 function isEmpty(str: string) {

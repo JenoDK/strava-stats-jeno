@@ -25,6 +25,8 @@ export interface ActivitiesFilter {
     after?: Moment;
     position?: PositionFilter;
     min_avg_speed?: number;
+    min_distance?: number;
+    max_distance?: number;
     avg_speed_between?: number[];
 }
 
@@ -45,6 +47,8 @@ interface StravaActivitiesFilterProps {
     onBeforeChanged: (value?: Moment) => void;
     onAfterChanged: (value?: Moment) => void;
     onAvgSpeedBetweenChanged: (value: number[]) => void;
+    onMinDistanceChanged: (value: number) => void;
+    onMaxDistanceChanged: (value: number) => void;
     onFilterReset: () => void;
     defaultValues: ActivitiesFilter;
 }
@@ -58,6 +62,7 @@ const defaultRadius = 5000;
 const defaultAfter = null;
 const defaultBefore = null;
 const defaultMinAvgSpeed = null;
+const defaultMinDistance = null;
 const defaultAvgSpeedBetween = [0, 100];
 
 const ITEM_HEIGHT = 48;
@@ -74,8 +79,6 @@ const MenuProps = {
 function avgSpeedBetweenText(value: number) {
     return `${value} km/h`;
 }
-
-const minDistance = 10;
 
 const avg_speed_between_marks = [
     {
@@ -101,6 +104,8 @@ export default function StravaActivitiesFilter(props: StravaActivitiesFilterProp
     const [after, setAfter] = useState<Moment | null>(defaultAfter);
     const [before, setBefore] = useState<Moment | null>(defaultBefore);
     const [minAvgSpeed, setMinAvgSpeed] = useState<number | null>(defaultMinAvgSpeed);
+    const [minDistance, setMinDistance] = useState<number | null>(defaultMinDistance);
+    const [maxDistance, setMaxDistance] = useState<number | null>(defaultMinDistance);
     const [avgSpeedBetween, setAvgSpeedBetween] = useState<number[]>(defaultAvgSpeedBetween);
 
     const handleSportTypeChange = (event: SelectChangeEvent<typeof sportType>) => {
@@ -132,9 +137,9 @@ export default function StravaActivitiesFilter(props: StravaActivitiesFilterProp
             return;
         }
         if (activeThumb === 0) {
-            setAvgSpeedBetween([Math.min(newValue[0], avgSpeedBetween[1] - minDistance), avgSpeedBetween[1]]);
+            setAvgSpeedBetween([Math.min(newValue[0], avgSpeedBetween[1] - 10), avgSpeedBetween[1]]);
         } else {
-            setAvgSpeedBetween([avgSpeedBetween[0], Math.max(newValue[1], avgSpeedBetween[0] + minDistance)]);
+            setAvgSpeedBetween([avgSpeedBetween[0], Math.max(newValue[1], avgSpeedBetween[0] + 10)]);
         }
         props.onAvgSpeedBetweenChanged(avgSpeedBetween);
     };
@@ -248,6 +253,7 @@ export default function StravaActivitiesFilter(props: StravaActivitiesFilterProp
         setIncludeCommute(props.defaultValues.include_commutes);
         setTitle(props.defaultValues.title_text);
         setMinAvgSpeed(defaultMinAvgSpeed);
+        setMinDistance(defaultMinDistance);
         setAvgSpeedBetween(defaultAvgSpeedBetween);
     }
 
@@ -335,6 +341,32 @@ export default function StravaActivitiesFilter(props: StravaActivitiesFilterProp
                 onChange={(event) => {
                     setMinAvgSpeed((Number(event.target.value) || null) );
                     props.onFilterChange(event);
+                }}
+            />
+            <TextField
+                id="min_distance"
+                label="Min distance"
+                value={minDistance}
+                type="number"
+                InputProps={{
+                    endAdornment: <InputAdornment position="end">km</InputAdornment>,
+                }}
+                onChange={(event) => {
+                    setMinDistance((Number(event.target.value) || null) );
+                    props.onMinDistanceChanged(Number(event.target.value));
+                }}
+            />
+            <TextField
+                id="max_distance"
+                label="Max distance"
+                value={maxDistance}
+                type="number"
+                InputProps={{
+                    endAdornment: <InputAdornment position="end">km</InputAdornment>,
+                }}
+                onChange={(event) => {
+                    setMaxDistance((Number(event.target.value) || null) );
+                    props.onMaxDistanceChanged(Number(event.target.value));
                 }}
             />
             <Typography id="input-slider" gutterBottom>

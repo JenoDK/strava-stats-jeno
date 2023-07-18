@@ -2,7 +2,17 @@ import FirstPageIcon from '@mui/icons-material/FirstPage';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
-import { Box, CircularProgress, Container, IconButton, Link, TableFooter, TablePagination, Typography, useTheme } from '@mui/material';
+import {
+    Box,
+    CircularProgress,
+    Container,
+    IconButton,
+    Link,
+    TableFooter,
+    TablePagination,
+    Typography,
+    useTheme
+} from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -10,23 +20,22 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { AxiosError } from 'axios';
-import { Moment } from 'moment';
-import { ReactNode, useEffect, useReducer, useState } from 'react';
-import { MapContainer, Polyline, TileLayer } from 'react-leaflet';
-import { ActivityType } from '../../api/strava/enums';
-import { CompleteAthlete, PolylineMap, SummaryActivity } from '../../api/strava/models';
-import { Strava } from '../../api/strava/StravaApi';
-import StravaActivitiesFilter, { ActivitiesFilter, defaultFilter, PositionFilter } from './StravaActivitiesFilter';
+import {AxiosError} from 'axios';
+import moment, {Moment} from 'moment';
+import {ReactNode, useEffect, useReducer, useState} from 'react';
+import {MapContainer, Polyline, TileLayer} from 'react-leaflet';
+import {ActivityType} from '../../api/strava/enums';
+import {CompleteAthlete, PolylineMap, SummaryActivity} from '../../api/strava/models';
+import {Strava} from '../../api/strava/StravaApi';
+import StravaActivitiesFilter, {ActivitiesFilter, defaultFilter, PositionFilter} from './StravaActivitiesFilter';
 import StravaActivitiesSummary from './StravaActivitiesSummary';
 
-import { decode } from 'google-polyline';
+import {decode} from 'google-polyline';
 
 import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-import moment from 'moment';
-import { IncludeOption } from '../../api/strava/enums/include-choice';
+import {IncludeOption} from '../../api/strava/enums/include-choice';
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -140,7 +149,7 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
                 } else {
                     setLoading(false);
                     setActivities(actvts);
-                    sessionStorage.setItem("activities", JSON.stringify(actvts));
+                    localStorage.setItem("activities", JSON.stringify(actvts));
                 }
             })
             .catch(function (error: AxiosError) {
@@ -150,7 +159,7 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
     }
 
     useEffect(() => {
-        const sessionActivities = sessionStorage.getItem("activities");
+        const sessionActivities = localStorage.getItem("activities");
         if (sessionActivities) {
             setActivities(JSON.parse(sessionActivities));
         } else {
@@ -197,6 +206,14 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
         setFilters({ avg_speed_between: avgSpeedBetween })
     }
 
+    function minDistanceChanged(minDistance: number) {
+        setFilters({ min_distance: minDistance })
+    }
+
+    function maxDistanceChanged(maxDistance: number) {
+        setFilters({ max_distance: maxDistance })
+    }
+
     function beforeChanged(value?: Moment) {
         if (value) {
             setFilters({ before: value.utc().startOf('day') });
@@ -218,7 +235,7 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
     }
 
     const checkFilters = (filters: ActivitiesFilter) => {
-        const sessionActivities = sessionStorage.getItem("activities");
+        const sessionActivities = localStorage.getItem("activities");
         if (sessionActivities) {
             let actvts: SummaryActivity[] = JSON.parse(sessionActivities);
             let filteredActivities = actvts.filter(activity => {
@@ -267,6 +284,12 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
                 }
                 const activitySpeedInKmPerH = (activity.average_speed * 3.6)
                 if (filters.min_avg_speed && activitySpeedInKmPerH < filters.min_avg_speed) {
+                    return false;
+                }
+                if (filters.min_distance && activity.distance < (filters.min_distance * 1000)) {
+                    return false;
+                }
+                if (filters.max_distance && activity.distance > (filters.max_distance * 1000)) {
                     return false;
                 }
                 if (filters.avg_speed_between) {
@@ -348,6 +371,8 @@ export default function StravaActivitiesTable(props: StravaActivitiesProps) {
                     onPositionFilterChanged={positionFilterChanged} 
                     onSportTypeChange={sportTypeChanged}
                     onAvgSpeedBetweenChanged={avgSpeedBetweenChanged}
+                    onMinDistanceChanged={minDistanceChanged}
+                    onMaxDistanceChanged={maxDistanceChanged}
                     onFilterReset={resetFilters} />
             </Container>
             <TableContainer component={Paper} sx={{ marginTop: 2 }}>

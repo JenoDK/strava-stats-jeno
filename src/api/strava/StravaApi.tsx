@@ -1,12 +1,14 @@
-import { Button, CircularProgress, Grid } from "@mui/material";
-import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { REACT_APP_BASE_PATH, REACT_APP_CLIENT_ID, REACT_APP_CLIENT_SECRET } from "../../constants/StravaConstants";
-import { TokenValue } from "../../providers/TokenResponseProvider";
+import {Button, CircularProgress, Grid} from "@mui/material";
+import {useEffect} from "react";
+import {useNavigate, useSearchParams} from "react-router-dom";
+import {REACT_APP_CLIENT_ID, REACT_APP_CLIENT_SECRET} from "../../constants/StravaConstants";
+import {TokenValue} from "../../providers/TokenResponseProvider";
 import axios from "../../utils/axios-config";
-import { StreamKeys } from './enums';
+import {StreamKeys} from './enums';
 import {
-    ActivityZone, AthleteStats, Comment,
+    ActivityZone,
+    AthleteStats,
+    Comment,
     DetailedActivity,
     DetailedAthlete,
     DetailedGear,
@@ -212,7 +214,7 @@ export default function StravaRedirect() {
                 .then(function (response) {
                     console.log(response);
                     storeTokenData(response.data);
-                    navigate(REACT_APP_BASE_PATH!);
+                    navigate("/");
                 })
                 .catch(function (error) {
                     console.log(error);
@@ -221,9 +223,9 @@ export default function StravaRedirect() {
     }, []);
 
     const storeTokenData = async (tokenValue: TokenValue) => {
-        sessionStorage.setItem("accessToken", tokenValue.access_token);
-        sessionStorage.setItem("refreshToken", tokenValue.refresh_token);
-        sessionStorage.setItem("expirationDate", tokenValue.expires_at.toString());
+        localStorage.setItem("accessToken", tokenValue.access_token);
+        localStorage.setItem("refreshToken", tokenValue.refresh_token);
+        localStorage.setItem("expirationDate", tokenValue.expires_at.toString());
     };
 
     return (
