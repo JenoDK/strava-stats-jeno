@@ -19,7 +19,6 @@ npm run predeploy
 ```
 npm run deploy
 ```
-and push the `gh-pages` branch
 
 ## Available Scripts
 
